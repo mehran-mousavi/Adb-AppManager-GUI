@@ -1,5 +1,7 @@
 # Android App Manager
 
+![Preview](preview.png)
+
 Android App Manager is a Python-based GUI application that allows users to manage their Android applications via ADB (Android Debug Bridge). It provides functionality to list, disable, and enable applications.
 
 ## Features
