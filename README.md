@@ -2,20 +2,20 @@
 
 ![Preview](preview.png)
 
-Android App Manager is a Python-based GUI application that allows users to manage their Android applications via ADB (Android Debug Bridge). It provides functionality to list, disable, and enable applications.
+Android App Manager is a Python-based GUI application that allows users to manage their Android applications via ADB (Android Debug Bridge). It provides functionality to list, search , disable, enable and uninstall applications.
 
 ## Features
 
 - List all installed applications on your Android device.
 - Disable any application.
 - Enable any application.
+- Uninstall any application.
 - Search for applications.
 
 ## Requirements
 
 - Python 3.x
-- Tkinter
-- ttkthemes
+- PyQt5
 - ADB installed and set in PATH
 
 ## Usage
@@ -25,15 +25,11 @@ Android App Manager is a Python-based GUI application that allows users to manag
 3. Run the script.
 
 \`\`\`bash
-python app_manager.py
+pip install -r requirements.txt
+python main.py
 \`\`\`
 
-The application will start and display a GUI.
-
-- Click "Update List" to fetch and display a list of all installed applications on your Android device.
-- Select an application from the list and click "Disable App" to disable the selected application.
-- Select an application from the list and click "Enable App" to enable the selected application.
-- Use the "Search" box to filter the applications list.
+The application will start and display a GUI to manage your Android applications.
 
 ## Note
 
