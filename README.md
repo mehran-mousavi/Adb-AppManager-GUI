@@ -7,10 +7,13 @@ Android App Manager is a Python-based GUI application that allows users to manag
 ## Features
 
 - List all installed applications on your Android device.
+- Application info
+- Debloating your phone
 - Disable any application.
 - Enable any application.
 - Uninstall any application.
 - Search for applications.
+
 
 ## Requirements
 
@@ -24,10 +27,10 @@ Android App Manager is a Python-based GUI application that allows users to manag
 2. Enable USB debugging on your Android device.
 3. Run the script.
 
-\`\`\`bash
+```bash
 pip install -r requirements.txt
 python main.py
-\`\`\`
+```
 
 The application will start and display a GUI to manage your Android applications.
 
