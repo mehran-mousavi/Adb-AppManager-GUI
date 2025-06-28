@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import json
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox, QLineEdit, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QColor
@@ -56,7 +57,19 @@ class AndroidAppManager(QMainWindow):
         self.all_apps = []  # Store all apps for filtering
         self.workers = []  # Keep track of all running workers
         self.all_apps_output = ""  # Initialize the attribute to store all apps output
+        self.uad_info = {}  # Will map package name to info
+        self.load_uad_lists()
         self.setup_ui()
+
+    def load_uad_lists(self):
+        try:
+            with open("uad_lists.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for entry in data:
+                    if "id" in entry:
+                        self.uad_info[entry["id"]] = entry
+        except Exception as e:
+            print(f"Failed to load uad_lists.json: {e}")
 
     def setup_ui(self):
         # Device selection
@@ -94,6 +107,15 @@ class AndroidAppManager(QMainWindow):
         self.app_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.app_table.setSelectionBehavior(QTableWidget.SelectRows)  # Change selection to row
         self.layout.addWidget(self.app_table)
+        self.app_table.itemSelectionChanged.connect(self.update_app_desc)
+
+        # App description area (moved below the grid)
+        self.app_desc_label = QLabel()
+        self.app_desc_label.setWordWrap(True)
+        self.app_desc_label.setMinimumHeight(80)
+        self.app_desc_label.setStyleSheet("background-color: #232629; color: #ffffff; border: 1px solid #555555; padding: 8px; border-radius: 3px;")
+        self.layout.addWidget(self.app_desc_label)
+        self.clear_app_desc()
 
         # Action buttons
         action_layout = QHBoxLayout()
@@ -109,6 +131,41 @@ class AndroidAppManager(QMainWindow):
         self.layout.addLayout(action_layout)
 
         self.refresh_devices()
+
+    def clear_app_desc(self):
+        self.app_desc_label.setText("<b>App Description:</b><br>Select an app to see details.")
+        self.app_desc_label.setStyleSheet("background-color: #232629; color: #ffffff; border: 1px solid #555555; padding: 8px; border-radius: 3px;")
+
+    def update_app_desc(self):
+        selected_items = self.app_table.selectedItems()
+        if not selected_items:
+            self.clear_app_desc()
+            return
+        row = selected_items[0].row()
+        package = self.app_table.item(row, 1).text()
+        info = self.uad_info.get(package)
+        if not info:
+            self.app_desc_label.setText(f"<b>App Description:</b><br>No info available for <code>{package}</code>.")
+            self.app_desc_label.setStyleSheet("background-color: #232629; color: #ffffff; border: 1px solid #555555; padding: 8px; border-radius: 3px;")
+            return
+        app_type = info.get("list", "Unknown")
+        desc = info.get("description", "No description available.")
+        removal = info.get("removal", "Recommended")
+        if removal == "Recommended":
+            removal_text = "<span style='color:#4CAF50;font-weight:bold;'>Recommended: Safe to remove this app.</span>"
+        elif removal == "Advanced":
+            removal_text = "<span style='color:#FFA500;font-weight:bold;'>Important package. Removal is only recommended for advanced users.</span>"
+        elif removal == "Expert":
+            removal_text = "<span style='color:#F44336;font-weight:bold;'>Critical package. Removing this may cause your device to become unusable (bricked).</span>"
+        else:
+            removal_text = f"<span>{removal}</span>"
+        html = f"""
+        <b style='font-weight:bold;margin-bottom:4px;'>App Type:</b> {app_type}<br>
+        <b style='font-weight:bold;margin-bottom:4px;'>Description:</b> {desc}<br>
+        <b style='font-weight:bold;margin-bottom:4px;'>Removal:</b> {removal_text}
+        """
+        self.app_desc_label.setText(html)
+        self.app_desc_label.setStyleSheet("background-color: #232629; color: #ffffff; border: 1px solid #555555; padding: 8px; border-radius: 3px;")
 
     def run_adb_command(self, command, callback):
         worker = AdbWorker(command)
